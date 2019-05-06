@@ -13,7 +13,7 @@ print('Libs Imported')
 # 2 INPUT VARIABLES----------------------------------------------------------------------------------------
 #region
 # Directory folder of the csv files you want to process
-filename = 'C:\FILES\Hansen-Data-Qualified.csv'
+filename = 'C:\FILES\Hansen-Data-Qualified2.csv'
 # Can change to xlsx if needed, other changes will be nessesary to code
 Extension = 'csv'
 # Csv files seperator for input and output files..generally (,) or (|)
@@ -66,13 +66,35 @@ print(df_data.head())
 # 5 DATA WRANGLING
 #region
 
-# 5.1 Delete Rows with everything missing in the row
+# 5.1 Deleting Rows
 #region
-rows_count = df_data.shape[0] 
-df_data = df_data.dropna(axis='index', how='all')
+
+# 5.1.1 Deleting Rows with everything missing in the row
+#region
+# Checking number of rows
+rows_count = df_data.shape[0]
+# Dropping rows
+df_data = df_data.dropna(axis='index', how='all', inplace=True)
+# Checking number of rows removed
 rows_deleted = df_data.shape[0] - rows_count
+# Printing rows removed
 print("Number of Rows Deleted =", rows_deleted)
 #endregion
+
+# 5.1.2 Deleting Rows with missing inflo in certain columns UNFINISHED
+#region
+# Checking number of rows
+rows_count = df_data.shape[0] 
+# Dropping rows
+df_data = df_data.dropna(axis='index', how='all', inplace=True)
+# Checking number of rows removed
+rows_deleted = df_data.shape[0] - rows_count
+# Printing rows removed
+print("Number of Rows Deleted =", rows_deleted)
+#endregion
+
+#endregion
+
 
 # 5.2 Delete Columns
 #region
@@ -93,11 +115,11 @@ df_data.head()
 # 5.4 Swapping Data in a Column
 #region
 #    Swap the name of the column to rename
-df.rename(columns={ColName: 'coltoswapxy'}, inplace=True)
+df_data.rename(columns={ColName: 'coltoswapxy'}, inplace=True)
 #    Make the replacements
 df_data.coltoswap.replace(dict_Subs , inplace = True)
 #    Swap back the name of the column to rename
-df.rename(columns={'coltoswapxy': ColName}, inplace=True)
+df_data.rename(columns={'coltoswapxy': ColName}, inplace=True)
 print(df_data.head())
 #endregion
 
