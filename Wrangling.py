@@ -16,25 +16,25 @@ print('Libs Imported')
 
 # 2 READ MAIN DATA
 #region
-
 # Input Variables
 #region
 # Directory folder of the csv files you want to process
-filename = 'C:\FILES\Hansen-Data-Qualified3.csv'
+filename = 'C:\FILES\Hansen-Data-Qualified.csv'
 # Can change to xlsx if needed, other changes will be nessesary to code
 Extension = 'csv'
 # Csv files seperator for input and output files..generally (,) or (|)
-Delimiter = ','
+DeLimiter = ','
 print('Directories loaded...')
 #endregion
-
-#sep=Delimiter,"
-df_data = pd.read_csv(filename, engine='python', dtype=str)
+# Code
+#region
+#df_data = pd.read_csv(filename, sep=DeLimiter, engine='python', dtype=str, na_values=['',' '])
+df_data = pd.read_csv(filename)
 print(df_data.shape)
 print(df_data.head())
 print('Dataframe Loaded...')
 #endregion
-
+#endregion
 
 
 
@@ -115,8 +115,6 @@ Strings_To_Check = [' ', '  ']
 Columns_To_Check = ['WONO']
 df_data2 = df_data.filter(axis='index', items = Columns_To_Check, regex=' ')
 '''
-
-#endregion
 
 #endregion
 
