@@ -14,22 +14,22 @@ print('Libs Imported')
 
 
 
-# 2 READ MAIN DATA
+# 2 READ MAIN DATA----------------------------------------------------------------------
 #region
 # Input Variables
 #region
 # Directory folder of the csv files you want to process
-filename = 'C:\FILES\Hansen-Data-Qualified.csv'
+filename = 'C:\FILES\Hansen-Data-Qualified3.csv'
 # Can change to xlsx if needed, other changes will be nessesary to code
 Extension = 'csv'
 # Csv files seperator for input and output files..generally (,) or (|)
 DeLimiter = ','
 print('Directories loaded...')
+print('Loading Data...')
 #endregion
 # Code
 #region
-#df_data = pd.read_csv(filename, sep=DeLimiter, engine='python', dtype=str, na_values=['',' '])
-df_data = pd.read_csv(filename)
+df_data = pd.read_csv(filename, sep=DeLimiter, engine='python', dtype=str)
 print(df_data.shape)
 print(df_data.head())
 print('Dataframe Loaded...')
@@ -39,19 +39,26 @@ print('Dataframe Loaded...')
 
 
 
-# 3 VIEWING ISSUES WITH DATA
-#region
 
+# 3 VIEWING UNIQUE ITEMS IN COLUMNS -----------------------------------------------------------
+#region
 # 3.1 Viewing a list of all the unique items in a column
-# Switch WONO with name of the column
-Unique_Array = df_data.WONO.unique()
+# Input Params
+Column_Name_To_Check3 = 'SPOTCODE' 
+
+# Create Array of Unique Items
+# Swap the name of the column to rename
+df_data.rename(columns={Column_Name_To_Check3: 'coltocheck'}, inplace=True)
+# Check Data
+Unique_Array = df_data.coltocheck.unique()
 Unique_Array.sort()
-#export the Array
+# Swap back the name of the column to rename
+df_data.rename(columns={'coltocheck': Column_Name_To_Check3}, inplace=True)
+
+#export the Unique Items Array
 Output_Loc_Filname = r'C:\FILES\UniqueCodes2.csv'
 pd.DataFrame(Unique_Array).to_csv(Output_Loc_Filname)
-
 np.savetxt(Output_Loc_Filname , Unique_Array, delimiter=',', fmt='%s')
-
 #endregion
 
 
@@ -63,7 +70,6 @@ np.savetxt(Output_Loc_Filname , Unique_Array, delimiter=',', fmt='%s')
 
 # 5.1 Deleting Rows
 #region
-
 # 5.1.1 Deleting Rows with everything missing in the row
 #region
 # Checking number of rows
@@ -76,7 +82,6 @@ rows_deleted = df_data.shape[0] - rows_count
 # Printing rows removed
 print("Number of Rows Deleted =", rows_deleted)
 #endregion
-
 # 5.1.2 Deleting Rows with missing info in certain columns
 #region
 # Input Parameters
@@ -95,7 +100,6 @@ rows_deleted = df_data.shape[0] - rows_count
 # Printing rows removed
 print("Number of Rows Deleted =", rows_deleted)
 #endregion
-
 # 5.1.3 Deleting Rows matching a certain string in a certain column
 #region
 Column_Name_To_Check = "SPOTVAL"
@@ -117,6 +121,13 @@ df_data2 = df_data.filter(axis='index', items = Columns_To_Check, regex=' ')
 '''
 
 #endregion
+# 5.1.4 Deleting Rows that don't map to items in a lookup table
+Lookup_Table_Dir = 'C:\FILES\Sample-Points.csv'
+Lookup_Column_Name_To_Check = 'NAME'
+Column_Name_To_Apply_Deletions = 'WONO'
+#Load Lookup Table
+df_lookup = pd.read_csv(Lookup_Table_Dir , sep=DeLimiter, engine='python', dtype=str)
+df_lookup.drop(df_.columns.difference(['a','b']), 1, inplace=True)
 
 # 5.2 Delete Columns
 #region
