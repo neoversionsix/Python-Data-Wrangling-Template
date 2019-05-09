@@ -30,8 +30,11 @@ print('Loading Data...')
 # Code
 #region
 df_data = pd.read_csv(filename, sep=DeLimiter, engine='python', dtype=str)
+print('-------------SHAPE--------------')
 print(df_data.shape)
+print('----------DATAFRAME-------------')
 print(df_data.head(1))
+print('--------------------------------')
 print('Dataframe Loaded.')
 #endregion
 #endregion
@@ -125,11 +128,11 @@ df_data2 = df_data.filter(axis='index', items = Columns_To_Check, regex=' ')
 #region
 Delete_Unmapped = 'n'
 Create_Unmapped_CSV = 'y'
-Lookup_Table_Dir = r'C:\FILES\SPTZ.xlsx'
-Output_Loc_Filname = r'C:\FILES\UniqueCodesUnmapped2.csv'
+Lookup_Table_Dir = r'C:\FILES\Hansen-Methods-In-EnviroSys.xlsx'
+Output_Loc_Filname = r'C:\FILES\UniqueCodesUnmapped5.csv'
 Sheet_To_Load = 'Data'
-Lookup_Column_Name_To_Check = 'NAME'
-Column_Name_To_Apply_Deletions = 'WONO-E'
+Lookup_Column_Name_To_Check = 'Method Short Name'
+Column_Name_To_Apply_Deletions = 'SPOTCODE-E'
 #Load Lookup Table
 df_lookup = pd.read_excel(Lookup_Table_Dir ,
     sheet_name = Sheet_To_Load,
@@ -167,21 +170,17 @@ if Delete_Unmapped == 'y':
     df_data = df_data2
 else:
     print('Original Data is untouched in df_data and filtered data is stored in df_data2')
+#End 5.1.4
 #endregion
+
+#End 5.1
 #endregion
 
 # 5.2 Delete Columns
 #region
 Cols_To_Delete = [
-    'WQKey',
     'WONO',
-    'ADDDTTM',
-    'SPOTVAL',
-    'COMMENTS',
-    'FLAG',
-    'ESTIMATED',
-    'FILENO',
-    'STATUS'
+    'SPOTCODE',
     ]
 df_data.drop(Cols_To_Delete, axis=1, inplace=True)
 df_data.head()
@@ -240,7 +239,7 @@ print('DONE SWAPPING')
 
 # 5.5 Sorting the Table
 #region
-Columns_Sort_Order = ['WONO', 'SPOTCODE']
+Columns_Sort_Order = ['WONO-E', 'SPOTCODE-E']
 df_data.sort_values(by = Columns_Sort_Order, inplace=True)
 print(df_data.head())
 #endregion
@@ -262,20 +261,40 @@ if Delete_Original_Column == 'y':
 #End-5.6.1
 #endregion
 
-# 5.6.2 Adding a string to the start of a row based on condition
+# 5.6.2 Delete a character from the end of a cell
+#region
+Column_To_Edit = 'WONO-E'
+Delete_Original_Column = 'y'
+String_To_Strip = '/'
+Edited_Col_Name = Column_To_Edit + '-E'
+df_data.rename(columns={Column_To_Edit: 'editingthiscolumn'}, inplace=True)
+New_Col_Edited = df_data.editingthiscolumn.str.rstrip(String_To_Strip)
+df_data[Edited_Col_Name] = New_Col_Edited
+df_data.rename(columns={'editingthiscolumn': Column_To_Edit}, inplace=True)
+if Delete_Original_Column == 'y':
+    df_data.drop(Column_To_Edit, axis=1, inplace=True)
+    df_data.rename(columns={Edited_Col_Name: Column_To_Edit}, inplace=True)
+#endregion
+#End-5.6.2
+
+# 5.6.5 Adding a string to the start of a row based on condition
 #region
 String_To_Check = 'SPT0'
 Column_Name_To_Check = 'WONO-E'
 String_To_Add = 'HANSEN-'
+
+# Get Indexes of Rows
+df_data.reset_index(drop=True)
 Bools_With_String = df_data[Column_Name_To_Check].str.startswith(String_To_Check)
-for item in Bools:
-    if item == True:
+Index_Array = Bools_With_String[Bools_With_String].index.values
 
+# Edit Cells
+for item in Index_Array:
+    x = df_data.at[item, Column_Name_To_Check]
+    new_string = String_To_Add + str(x)
+    df_data.at[item, Column_Name_To_Check] = new_string
 
-
-
-
-#End 5.6.2
+#End 5.6.5
 #endregion
 
 #End-5.6
@@ -295,7 +314,7 @@ for item in Bools:
 #region
 # Input Params
 Output_Location = 'C:/FILES/'
-Output_filename = 'Hansen-Data-Qualified5'
+Output_filename = 'Hansen-Data-Qualified8'
 Output_Extension = '.csv'
 Delimiter = ','
 
