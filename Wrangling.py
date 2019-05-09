@@ -19,20 +19,20 @@ print('Libs Imported')
 # Input Variables
 #region
 # Directory folder of the csv files you want to process
-filename = 'C:\FILES\Hansen-Data-Qualified3.csv'
+filename = r'C:\FILES\Hansen-Data-Qualified3.csv'
 # Can change to xlsx if needed, other changes will be nessesary to code
 Extension = 'csv'
 # Csv files seperator for input and output files..generally (,) or (|)
 DeLimiter = ','
-print('Directories loaded...')
+print('Directories loaded.')
 print('Loading Data...')
 #endregion
 # Code
 #region
 df_data = pd.read_csv(filename, sep=DeLimiter, engine='python', dtype=str)
 print(df_data.shape)
-print(df_data.head())
-print('Dataframe Loaded...')
+print(df_data.head(1))
+print('Dataframe Loaded.')
 #endregion
 #endregion
 
@@ -44,7 +44,7 @@ print('Dataframe Loaded...')
 #region
 # 3.1 Viewing a list of all the unique items in a column
 # Input Params
-Column_Name_To_Check3 = 'SPOTCODE' 
+Column_Name_To_Check3 = 'SPOTCODE'
 
 # Create Array of Unique Items
 # Swap the name of the column to rename
@@ -122,16 +122,41 @@ df_data2 = df_data.filter(axis='index', items = Columns_To_Check, regex=' ')
 
 #endregion
 # 5.1.4 Deleting Rows that don't map to items in a lookup table
-Lookup_Table_Dir = 'C:\FILES\Sample-Points.csv'
+Lookup_Table_Dir = r'C:\FILES\SPTZ.xlsx'
+Sheet_To_Load = 'Data'
 Lookup_Column_Name_To_Check = 'NAME'
 Column_Name_To_Apply_Deletions = 'WONO'
 #Load Lookup Table
-df_lookup = pd.read_csv(Lookup_Table_Dir , sep=DeLimiter, engine='python', dtype=str)
-df_lookup.drop(df_.columns.difference(['a','b']), 1, inplace=True)
+df_lookup = pd.read_excel(Lookup_Table_Dir ,
+    sheet_name = Sheet_To_Load,
+    dtype=object)
+print('loaded')
+print('Rows, Columns:')
+print(df_lookup.shape)
+# Delete All columns except
+Cols_Dont_Delete = [Lookup_Column_Name_To_Check]
+df_lookup.drop(df_lookup.columns.difference(Cols_Dont_Delete), 1, inplace=True)
+print('Columns Deleted')
+print('Rows, Columns:')
+print(df_lookup.shape)
+print('Generating Bools Filter...')
+Bools_Mapping_Series = df_data[Column_Name_To_Apply_Deletions].isin(df_lookup[Lookup_Column_Name_To_Check])
+print('Bools Generated')
+
 
 # 5.2 Delete Columns
 #region
-Cols_To_Delete = ['WQKey', 'WONO', 'ADDDTTM', 'SPOTVAL', 'COMMENTS', 'FLAG', 'ESTIMATED', 'FILENO', 'STATUS']
+Cols_To_Delete = [
+    'WQKey',
+    'WONO',
+    'ADDDTTM',
+    'SPOTVAL',
+    'COMMENTS',
+    'FLAG',
+    'ESTIMATED',
+    'FILENO',
+    'STATUS'
+    ]
 df_data.drop(Cols_To_Delete, axis=1, inplace=True)
 df_data.head()
 #endregion
@@ -258,7 +283,7 @@ if PartialChunck == True:
     df_temp=df_data.iloc[FromRow::, :]
     df_temp.to_csv(path_or_buf=FName, sep=Delimiter, index=False)
 
-print('EXPORTED CHUNKING DONE!!!!!!!!!!!!!!!!!!')
+print('EXPORTED CHUNKING DONE!')
 #endregion
 
 #endregion
