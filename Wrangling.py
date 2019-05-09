@@ -19,7 +19,7 @@ print('Libs Imported')
 # Input Variables
 #region
 # Directory folder of the csv files you want to process
-filename = r'C:\FILES\Hansen-Data-Qualified3.csv'
+filename = r'C:\FILES\Hansen-Data-Qualified5.csv'
 # Can change to xlsx if needed, other changes will be nessesary to code
 Extension = 'csv'
 # Csv files seperator for input and output files..generally (,) or (|)
@@ -121,28 +121,54 @@ df_data2 = df_data.filter(axis='index', items = Columns_To_Check, regex=' ')
 '''
 
 #endregion
-# 5.1.4 Deleting Rows that don't map to items in a lookup table
+# 5.1.4 Deleting and/or Checking Rows that don't map to items in a lookup table
+#region
+Delete_Unmapped = 'n'
+Create_Unmapped_CSV = 'y'
 Lookup_Table_Dir = r'C:\FILES\SPTZ.xlsx'
+Output_Loc_Filname = r'C:\FILES\UniqueCodesUnmapped2.csv'
 Sheet_To_Load = 'Data'
 Lookup_Column_Name_To_Check = 'NAME'
-Column_Name_To_Apply_Deletions = 'WONO'
+Column_Name_To_Apply_Deletions = 'WONO-E'
 #Load Lookup Table
 df_lookup = pd.read_excel(Lookup_Table_Dir ,
     sheet_name = Sheet_To_Load,
     dtype=object)
-print('loaded')
+print('loaded lookup table.')
 print('Rows, Columns:')
 print(df_lookup.shape)
 # Delete All columns except
 Cols_Dont_Delete = [Lookup_Column_Name_To_Check]
 df_lookup.drop(df_lookup.columns.difference(Cols_Dont_Delete), 1, inplace=True)
-print('Columns Deleted')
+print('Columns Deleted.')
 print('Rows, Columns:')
 print(df_lookup.shape)
 print('Generating Bools Filter...')
 Bools_Mapping_Series = df_data[Column_Name_To_Apply_Deletions].isin(df_lookup[Lookup_Column_Name_To_Check])
-print('Bools Generated')
-
+print('Bools Generated.')
+df_data2 = df_data[Bools_Mapping_Series]
+df_deleted = df_data[~Bools_Mapping_Series]
+print('Data Filtered and now in df_data2')
+df_deleted.rename(columns={Column_Name_To_Apply_Deletions: 'coltocheck'}, inplace=True)
+Unique_Array_Unmapped = df_deleted.coltocheck.unique()
+Unique_Array_Unmapped.sort()
+print('Created ndarray of unmapped items called: Unique_Array_Unmapped')
+df_data.rename(columns={'coltocheck': Column_Name_To_Apply_Deletions}, inplace=True)
+#export the Unique Items Array to a CSV
+if Create_Unmapped_CSV == 'y':
+    print('Exporting Unmapped Items to a CSV...')
+    pd.DataFrame(Unique_Array_Unmapped).to_csv(Output_Loc_Filname)
+    np.savetxt(Output_Loc_Filname , Unique_Array_Unmapped, delimiter=',', fmt='%s')
+    print('Unique Unmapped CSV created.')
+    print('See Location: ', Output_Loc_Filname)
+# Effectively Deleting Unmapped Items if requested
+if Delete_Unmapped == 'y':
+    print('deleting Unmapped Items from df_data')
+    df_data = df_data2
+else:
+    print('Original Data is untouched in df_data and filtered data is stored in df_data2')
+#endregion
+#endregion
 
 # 5.2 Delete Columns
 #region
@@ -212,13 +238,50 @@ print('DONE SWAPPING')
 #endregion
 #endregion
 
-#5.5 Sorting the Table
+# 5.5 Sorting the Table
 #region
 Columns_Sort_Order = ['WONO', 'SPOTCODE']
 df_data.sort_values(by = Columns_Sort_Order, inplace=True)
 print(df_data.head())
 #endregion
 
+# 5.6 Editing Data
+#region
+# 5.6.1 Delete spaces from start and end of a cell swap to 'lstrip' or 'rstrip' if required
+#region
+Column_To_Edit = 'SPOTCODE'
+Delete_Original_Column = 'n'
+Edited_Col_Name = Column_To_Edit + '-E'
+df_data.rename(columns={Column_To_Edit: 'editingthiscolumn'}, inplace=True)
+New_Col_Edited = df_data.editingthiscolumn.str.strip()
+df_data[Edited_Col_Name] = New_Col_Edited
+df_data.rename(columns={'editingthiscolumn': Column_To_Edit}, inplace=True)
+if Delete_Original_Column == 'y':
+    df_data.drop(Column_To_Edit, axis=1, inplace=True)
+    df_data.rename(columns={Edited_Col_Name: Column_To_Edit}, inplace=True)
+#End-5.6.1
+#endregion
+
+# 5.6.2 Adding a string to the start of a row based on condition
+#region
+String_To_Check = 'SPT0'
+Column_Name_To_Check = 'WONO-E'
+String_To_Add = 'HANSEN-'
+Bools_With_String = df_data[Column_Name_To_Check].str.startswith(String_To_Check)
+for item in Bools:
+    if item == True:
+
+
+
+
+
+#End 5.6.2
+#endregion
+
+#End-5.6
+#endregion
+
+#End-5
 #endregion
 
 
@@ -232,7 +295,7 @@ print(df_data.head())
 #region
 # Input Params
 Output_Location = 'C:/FILES/'
-Output_filename = 'Hansen-Data-Qualified3'
+Output_filename = 'Hansen-Data-Qualified5'
 Output_Extension = '.csv'
 Delimiter = ','
 
@@ -240,7 +303,7 @@ Delimiter = ','
 FName = Output_Location + Output_filename + Output_Extension
 df_data.to_csv(path_or_buf=FName, sep= Delimiter, index=False)
 print('---------------------------------------------')
-print('DONE')
+print('EXPORTING CSV DONE')
 #endregion
 
 # 6.2 Chuncked Export
