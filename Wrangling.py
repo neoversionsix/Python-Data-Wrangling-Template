@@ -14,12 +14,13 @@ print('Libs Imported')
 
 
 
-# 2 READ MAIN DATA----------------------------------------------------------------------
+# 2 READ DATA----------------------------------------------------------------------
 #region
 # Input Variables
 #region
 # Directory folder of the csv files you want to process
-filename = r'C:\FILES\Hansen-Data-Qualified5.csv'
+filename = r'C:\FILES\Hansen-Data-Qualified8.csv'
+print('Data will load from: ', filename)
 # Can change to xlsx if needed, other changes will be nessesary to code
 Extension = 'csv'
 # Csv files seperator for input and output files..generally (,) or (|)
@@ -43,9 +44,10 @@ print('Dataframe Loaded.')
 
 
 
-# 3 VIEWING UNIQUE ITEMS IN COLUMNS -----------------------------------------------------------
+# 3 VIEWING ITEMS IN COLUMNS -----------------------------------------------------------
 #region
 # 3.1 Viewing a list of all the unique items in a column
+#region
 # Input Params
 Column_Name_To_Check3 = 'SPOTCODE'
 
@@ -62,6 +64,10 @@ df_data.rename(columns={'coltocheck': Column_Name_To_Check3}, inplace=True)
 Output_Loc_Filname = r'C:\FILES\UniqueCodes2.csv'
 pd.DataFrame(Unique_Array).to_csv(Output_Loc_Filname)
 np.savetxt(Output_Loc_Filname , Unique_Array, delimiter=',', fmt='%s')
+#End-3.1
+#endregion
+
+#End-3
 #endregion
 
 
@@ -328,10 +334,10 @@ print('EXPORTING CSV DONE')
 # 6.2 Chuncked Export
 #region
 #INPUT PARAMS
-Out_File_Loc_Name = 'C:/FILES/CHUNKS/CHUNK.csv'
+Out_File_Loc_Name = 'C:/FILES/HCHUNKS/HANSENDB_.csv'
 Output_Extension = '.csv'
-Delimiter = ','
-ChunckSize = 500
+Delimiter = '|'
+ChunckSize = 1000
 
 #CODE
 NumToRemove = -1 * (len(Output_Extension))
@@ -342,6 +348,7 @@ NoChuncks = Row_Max/ChunckSize
 NoChuncksInt = int(NoChuncks)
 PartialChunck = NoChuncks - NoChuncksInt
 
+print('Chunking Data...')
 if PartialChunck > 0:
     Bool_PartialChunck = True
 else:
