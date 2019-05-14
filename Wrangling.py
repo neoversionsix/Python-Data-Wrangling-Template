@@ -16,7 +16,7 @@ print('Libs Imported')
 
 # 2 READ DATA----------------------------------------------------------------------
 #region
-# Input Variables
+# 2.1 Read a Single CSV file
 #region
 # Directory folder of the csv files you want to process
 filename = r'C:\FILES\Hansen-Data-Qualified8.csv'
@@ -27,9 +27,7 @@ Extension = 'csv'
 DeLimiter = ','
 print('Directories loaded.')
 print('Loading Data...')
-#endregion
 # Code
-#region
 df_data = pd.read_csv(filename, sep=DeLimiter, engine='python', dtype=str)
 print('-------------SHAPE--------------')
 print(df_data.shape)
@@ -37,7 +35,15 @@ print('----------DATAFRAME-------------')
 print(df_data.head(1))
 print('--------------------------------')
 print('Dataframe Loaded.')
+#End 2.1
 #endregion
+
+# 2.2 Read a Single XLSX file
+#region
+#End 2.2
+#endregion
+
+#End 2
 #endregion
 
 
