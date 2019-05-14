@@ -50,7 +50,6 @@ print('Dataframe Loaded.')
 #region
 # Input Params
 Column_Name_To_Check3 = 'SPOTCODE'
-
 # Create Array of Unique Items
 # Swap the name of the column to rename
 df_data.rename(columns={Column_Name_To_Check3: 'coltocheck'}, inplace=True)
@@ -59,14 +58,56 @@ Unique_Array = df_data.coltocheck.unique()
 Unique_Array.sort()
 # Swap back the name of the column to rename
 df_data.rename(columns={'coltocheck': Column_Name_To_Check3}, inplace=True)
-
 #export the Unique Items Array
 Output_Loc_Filname = r'C:\FILES\UniqueCodes2.csv'
 pd.DataFrame(Unique_Array).to_csv(Output_Loc_Filname)
 np.savetxt(Output_Loc_Filname , Unique_Array, delimiter=',', fmt='%s')
 #End-3.1
 #endregion
-
+# 3.2 Comparting Rows in a Column with items in a lookup table
+#region
+Data_Column_Name= 'SPOTCODE-E'
+Create_Unmapped_CSV = 'y'
+Lookup_Table_Dir = r'C:\FILES\Hansen-Methods-In-EnviroSys.xlsx'
+Sheet_To_Load = 'Data'
+Lookup_Column_Name_To_Check = 'Method Short Name'
+Output_Loc_Filname = r'C:\FILES\UniqueCodesUnmapped5.csv'
+#Load Lookup Table
+df_lookup = pd.read_excel(Lookup_Table_Dir ,
+    sheet_name = Sheet_To_Load,
+    dtype=object)
+print('loaded lookup table.')
+print('Rows, Columns:')
+print(df_lookup.shape)
+# Delete All columns in lookup table except
+Cols_Dont_Delete = [Lookup_Column_Name_To_Check]
+df_lookup.drop(df_lookup.columns.difference(Cols_Dont_Delete), 1, inplace=True)
+print('Columns Deleted.')
+print('Rows, Columns:')
+print(df_lookup.shape)
+print('Generating Bools Filter...')
+Bools_Mapping_Series = df_data[Data_Column_Name].isin(df_lookup[Lookup_Column_Name_To_Check])
+print('Bools Generated.')
+print('Creating dataframe with filtered data df_data2...')
+df_data2 = df_data[Bools_Mapping_Series]
+df_deleted = df_data[~Bools_Mapping_Series]
+print('Data Filtered and now in df_data2')
+df_deleted.rename(columns={Data_Column_Name: 'coltocheck'}, inplace=True)
+Unique_Array_Unmapped = df_deleted.coltocheck.unique()
+Unique_Array_Unmapped.sort()
+print('Created ndarray of unmapped items called: Unique_Array_Unmapped')
+df_data.rename(columns={'coltocheck': Data_Column_Name}, inplace=True)
+#export the Unique Items Array to a CSV
+if Create_Unmapped_CSV == 'y':
+    print('Exporting Unmapped Items to a CSV...')
+    pd.DataFrame(Unique_Array_Unmapped).to_csv(Output_Loc_Filname)
+    np.savetxt(Output_Loc_Filname , Unique_Array_Unmapped, delimiter=',', fmt='%s')
+    print('Unique Unmapped CSV created.')
+    print('See Location: ', Output_Loc_Filname)
+    print('DONE!')
+    print('------------------------------------')
+#End-3.2
+#endregion
 #End-3
 #endregion
 
