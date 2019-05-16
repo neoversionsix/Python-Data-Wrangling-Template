@@ -874,6 +874,8 @@ print('Libs Imported')
 print('Importing Input variables')
 # Directory folder of the csv files you want to process
 Input_path_CSVs = 'C:/FILES/Input_CSV/'
+# Column Name to Apply Swapping To
+Col_To_Apply_Swap = 'LOCATIONCODE'
 # Directory folder of the report
 Output_path_Report = 'C:/FILES/'
 # Can change to xlsx if needed, other changes will be nessesary to code
@@ -892,7 +894,7 @@ print('Directories loaded...')
 #endregion
 # READ AND PROCESS THE UNIQUE SAMPLE POINTS FILE----------------------------------------------------------------
 #region
-df_SPTs = pd.read_excel(Input_path_SPT, sheet_name='Data', dtype={'Name': object, 'OldSiteCode_post2007': object})
+df_SPTs = pd.read_excel(Input_path_SPT, sheet_name='Data', dtype=object)
 List_Columns_Keep = ['Name','OldSiteCode_post2007', 'Status']
 df_SPTs = df_SPTs[List_Columns_Keep]
 df_SPTs.columns = ['REPLACE-WITH', 'FIND-CODE', 'Status']
@@ -923,7 +925,7 @@ NumFiles = len(filenames)
 print(NumFiles, 'csv files found.')
 #endregion
 
-# MOVE FILES WITHOUT 'LOCATIONCODE'  --------------------------------------------
+# MOVE FILES WITHOUT THE NAME OF THE COLUMN TO SWAP  --------------------------------------
 #region
 counter_good_files = 0
 counter_bad_files = 0
@@ -931,19 +933,30 @@ List_Unsupported_Files = []
 for filename in filenames:
     # Save an individual file as a DataFrame Object to analyse
     try:
-        df_file = pd.read_csv(filename, sep=Delimiter, index_col=False, engine='python')
-        if 'LOCATIONCODE' in df_file.columns:
+        df_file = pd.read_csv(filename, sep=Delimiter, engine='python', dtype=object)
+        Column_Names_List = df_file.columns.tolist()
+        if Col_To_Apply_Swap in Column_Names_List:
             counter_good_files +=1
         else:
             List_Unsupported_Files.append(filename)
             counter_bad_files +=1
     except:
-        List_Unsupported_Files.append(filename)
-        counter_bad_files +=1
+        # Try and deal with weirdly formatted csv
+        try:
+            df_file = pd.read_csv(filename, sep=Delimiter, engine='c', dtype=object, encoding='latin1')
+            Column_Names_List = df_file.columns.tolist()
+            if Col_To_Apply_Swap in Column_Names_List:
+                counter_good_files +=1
+            else:
+                List_Unsupported_Files.append(filename)
+                counter_bad_files +=1
+        except:    
+            List_Unsupported_Files.append(filename)
+            counter_bad_files +=1
 
 # Print stats        
-print('Number of Files that can be Analysed:', counter_good_files)
-print("Number of Files that can't be Analysed:", counter_bad_files)
+print('Number of Files that can be Analysed: ', counter_good_files)
+print('Number of Files that can\'t be Analysed: ', counter_bad_files)
 
 # Move files
 print('Moving Files...')
@@ -982,7 +995,10 @@ for filename in filenames:
     Int_Replaced_SPTs = int(0)
     
     # Save the individual file as a DataFrame Object to analyse
-    df_file = pd.read_csv(filename, sep=Delimiter, index_col=False, engine='python', dtype=object)
+    try:
+        df_file = pd.read_csv(filename, sep=Delimiter, index_col=False, engine='python', dtype=object)
+    except:
+        df_file = pd.read_csv(filename, sep=Delimiter, index_col=False, engine='c', dtype=object, encoding='latin1')
     # Delete Rows with everything missing in the row
     df_file = df_file.dropna(axis='index', how='all')
     Int_Total_Rows = df_file.shape[0]
@@ -990,7 +1006,7 @@ for filename in filenames:
 
     ###################  QA DATA DELETION  ##################################
     # Check and Find if Blanks exist in Location Code Rows
-    bools_ml = df_file['LOCATIONCODE'].isnull()
+    bools_ml = df_file[Col_To_Apply_Swap].isnull()
     bools_ml = np.array(bools_ml)
     
     # Check and Find if/Where Blanks exist in Location Description Rows
@@ -1000,12 +1016,14 @@ for filename in filenames:
        
     ################### SWAP OLD CODES FOR SPT CODES ####################
         # Count the number of replacements that can be made
-    for item in df_file['LOCATIONCODE']:
+    for item in df_file[Col_To_Apply_Swap]:
         if item in List_OSCs:
             Int_Replaced_SPTs +=1
 
     # Make the replacements
-    df_file.LOCATIONCODE.replace(dict_SPTs , inplace = True)
+    df_file.rename(columns={Col_To_Apply_Swap: 'TEMP_SWAP_NAME'}, inplace=True)
+    df_file.TEMP_SWAP_NAME.replace(dict_SPTs , inplace = True)
+    df_file.rename(columns={'TEMP_SWAP_NAME':Col_To_Apply_Swap}, inplace=True)
       
     
     ###################  REPORT UPDATING ############################
